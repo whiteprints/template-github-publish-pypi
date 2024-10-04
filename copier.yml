@@ -1,0 +1,33 @@
+_subdirectory: "template"
+_tasks:
+  - ["git", "add", ".github/workflows/publish_pypi.yml"]
+  - ["uv", "run", "injectors/md_files.py"]
+  - ["uv", "run", "injectors/call_gh.py"]
+  - ["uv", "run", "injectors/inject_urls.py"]
+  - ["uv", "run", "injectors/update_docs.py"]
+  - ["rm", "-r", "injectors"]
+  - command: [
+    "uvx", "--quiet", "--no-progress", "reuse", "annotate",
+    "--copyright", "{{ author }} <{{ author_email }}>",
+    "--license", "{{ code_license_id }}",
+    "--copyright-prefix", "spdx-symbol",
+    "--style", "python",
+    ".github/workflows/publish_pypi.yml",
+    "pyproject.toml",
+  ]
+    when: "{{ code_license_id != '' }}"
+  - command: [
+    "uvx", "--quiet", "--no-progress", "reuse", "annotate",
+    "--copyright", "SPDX-FileCopyrightText: {{ header }}",
+    "--license", "LicenseRef-PROPRIETARY",
+    "--style", "python",
+    ".github/workflows/publish_pypi.yml",
+    "pyproject.toml",
+  ]
+    when: "{{ code_license_id == '' }}"
+  - ["uvx", "--quiet", "--no-progress", "tox", "run", "-e", "autofix"]
+  - ["git", "add", "--update"]
+  - ["git", "commit", "--message", "feat: ✨ add PyPI publishing"]
+  - ["git", "push"]
+  - ["uv", "--no-progress", "--quiet", "run", "--no-sync", "python", "-c", "print('\\n\\nPyPI OCID:\\nOwner:            {{ organisation }}\\nRepository name:  {% include(pathjoin('includes', 'project_slug.jinja')) %}\\nWorkflow name:    publish_pypi.yml\\nEnvironment name: publish_pypi')"]
+  - ["uv", "--no-progress", "--quiet", "run", "--no-sync", "python", "-c", "print('\\n\\nTest PyPI OCID:\\nOwner:            {{ organisation }}\\nRepository name:  {% include(pathjoin('includes', 'project_slug.jinja')) %}\\nWorkflow name:    publish_pypi.yml\\nEnvironment name: publish_testpypi')"]

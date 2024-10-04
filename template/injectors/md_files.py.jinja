@@ -1,0 +1,72 @@
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
+
+"""Update Markdown files."""
+
+
+from pathlib import Path
+
+
+def update_readme() -> None:
+    """Update README.md."""
+    readme_file = Path("README.md")
+    readme = readme_file.read_text("utf-8")
+    source = """        <a href="https://www.python.org/"><img alt="Python badge" src="https://img.shields.io/badge/Python->=3.{{ target_python_version[3:] }}-306998.svg?logo=Python&logoColor=ffd43b"/></a>"""
+    if source not in readme:
+        raise ValueError("Replacement failed")
+
+    readme = readme.replace(
+        source,
+"""        <a href="https://pypi.org/project/{% include pathjoin('includes', 'project_slug.jinja') %}"><img alt="PyPI - Project Version" src="https://img.shields.io/pypi/v/{% include pathjoin('includes', 'project_slug.jinja') %}.svg?logo=PyPI&logoColor=3775A9"/></a>
+        <a href="https://www.python.org"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/{% include pathjoin('includes', 'project_slug.jinja') %}.svg-306998?logo=Python&logoColor=ffd43b"/></a>""",
+    )
+    readme_file.write_text(readme, encoding="utf-8")
+
+    install_file = Path("INSTALL.md")
+    install = install_file.read_text("utf-8")
+    source = """
+## From source
+"""
+    if source not in install:
+        raise ValueError("Replacement failed")
+
+    install = install.replace(
+        source,
+"""
+## From PyPI
+
+To install the [package] from [PyPI] run
+
+```console
+pip install {% include pathjoin('includes', 'project_slug.jinja') %}
+```
+
+[PyPI]: https://pypi.org/
+
+## From source
+"""
+    )
+    install = install.replace(
+        " package ",
+        " [package] ",
+    ).replace(
+"""
+[pip]: https://pip.pypa.io/en/stable/
+""",
+"""
+[pip]: https://pip.pypa.io/en/stable
+[package]: https://pypi.org/project/{% include pathjoin('includes', 'project_slug.jinja') %}
+""",
+    )
+    install_file.write_text(install, encoding="utf-8")
+
+
+def main() -> None:
+    update_readme()
+
+
+if __name__ == "__main__":
+    main()
+

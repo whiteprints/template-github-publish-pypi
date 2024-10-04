@@ -1,0 +1,46 @@
+# /// script
+# requires-python = ">=3.9"
+# dependencies = [
+#     "tomli>=2.0.1; python_full_version<'3.11'",
+#     "tomli_w>=1.0.0",
+# ]
+# ///
+"""Module to update `pyproject.toml` with new entry points."""
+
+import sys
+from pathlib import Path
+
+import tomli_w
+
+
+if sys.version_info < (3, 11):
+    import tomli as tomllib
+else:
+    import tomllib
+
+
+def update_pyproject_toml() -> None:
+    """Updates the `pyproject.toml` file to add a new entry point.
+
+    This function loads the existing data from `pyproject.toml`, modifies
+    it to include an entry point with the specified name that points to
+    the given module and function, and writes the updated data back to the
+    file.
+    """
+    with Path("pyproject.toml").open("rb") as file:
+        data = tomllib.load(file)
+        urls = data.setdefault("project", {}).setdefault("urls", {})
+
+        urls["pypi"] = "https://pypi.org/project/{% include pathjoin('includes', 'project_slug.jinja') %}"
+
+    with Path("pyproject.toml").open("wb") as file:
+        tomli_w.dump(data, file)
+
+
+def main() -> None:
+    """Update the pyproject.toml entrypoint."""
+    update_pyproject_toml()
+
+
+if __name__ == "__main__":
+    main()

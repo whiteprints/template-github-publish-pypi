@@ -1,0 +1,109 @@
+# /// script
+# requires-python = ">=3.9"
+# dependencies = []
+# ///
+
+"""Automate a series of GitHub-related commands for setting up a repository."""
+
+import asyncio
+import json
+import logging
+import subprocess  # nosec
+import shutil
+import tempfile
+from pathlib import Path
+from subprocess import CalledProcessError
+from typing import Dict, List
+
+
+def get_tool_path(tool_name: str) -> Path:
+    """Get the path of a CLI tool, ensuring it is installed."""
+    tool_path = shutil.which(tool_name)
+    if tool_path is None:
+        raise FileNotFoundError(f"{tool_name} is not installed or not in the system PATH.")
+    return Path(tool_path)
+
+
+def run_command_sync(command: List[str]) -> str:
+    """Run a command synchronously using subprocess with shell=False."""
+    result = subprocess.run(  # nosec
+        command, check=True, text=True, capture_output=True, shell=False
+    )
+    return result.stdout.strip()
+
+
+async def run_command(command: List[str]) -> str:
+    """Run a command asynchronously using asyncio with shell=False."""
+    return await asyncio.to_thread(run_command_sync, command)
+
+
+async def configure_environment(
+    gh_path: Path,
+    *,
+    organisation: str,
+    project_name: str,
+    environment_name: str,
+    reviewer: bool,
+) -> None:
+    """Configure the GitHub environment with reviewers and branch policy."""
+    # Get the reviewer ID using the GitHub CLI
+    command = [
+        gh_path, "api", "--method", "PUT",
+        f"/repos/{organisation}/{project_name}/environments/{environment_name}",
+        "-F", "wait_timer=0",
+        "-F", "deployment_branch_policy[protected_branches]=true",
+        "-F", "deployment_branch_policy[custom_branch_policies]=false",
+    ]
+    if reviewer:
+        reviewer_id = (await run_command([gh_path, "api", "user", "--jq", ".id"])).strip()
+        if not reviewer_id:
+            return
+
+        command.extend([
+            "-F", "prevent_self_review=false",
+            "-F", "reviewers[][type]=User",
+            "-F", f"reviewers[][id]={reviewer_id}",
+        ])
+    # Configure the environment using the retrieved reviewer ID
+    try:
+        await run_command(command)
+    except CalledProcessError as e:
+        logging.info(e)
+
+
+async def run_all_commands(gh_path: Path, tox_path: Path, git_path: Path) -> None:
+    """Run all the necessary commands based on the provided conditions."""
+
+    # Example condition and variables - replace these with actual logic
+    organisation = "{{ organisation }}"
+    project_name = "{% include pathjoin('includes', 'project_slug.jinja') %}"
+
+    await asyncio.gather(
+        configure_environment(
+            gh_path=gh_path,
+            organisation=organisation,
+            project_name=project_name,
+            environment_name="publish_testpypi",
+            reviewer=False,
+        ),
+        configure_environment(
+            gh_path=gh_path,
+            organisation=organisation,
+            project_name=project_name,
+            environment_name="publish_pypi",
+            reviewer=True,
+        ),
+    )
+
+
+def main() -> None:
+    """Main script."""
+    gh_path = get_tool_path("gh")
+    tox_path = get_tool_path("tox")
+    git_path = get_tool_path("git")
+
+    asyncio.run(run_all_commands(gh_path=gh_path, tox_path=tox_path, git_path=git_path))
+
+
+if __name__ == "__main__":
+    main()
