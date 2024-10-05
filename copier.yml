@@ -8,7 +8,7 @@ _tasks:
   - ["rm", "-r", "injectors"]
   - command: [
     "uvx", "--quiet", "--no-progress", "reuse", "annotate",
-    "--copyright", "{{ author }} <{{ author_email }}>",
+    "--copyright", "{{ copyright_holder }} <{{ copyright_holder_email }}>",
     "--license", "{{ code_license_id }}",
     "--copyright-prefix", "spdx-symbol",
     "--style", "python",
