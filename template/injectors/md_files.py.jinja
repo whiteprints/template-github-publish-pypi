@@ -19,8 +19,8 @@ def update_readme() -> None:
 
     readme = readme.replace(
         source,
-"""        <a href="https://www.python.org"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/{% include pathjoin('includes', 'project_slug.jinja') %}.svg?logo=Python&logoColor=ffd43b"/></a>
-        <a href="https://pypi.org/project/{% include pathjoin('includes', 'project_slug.jinja') %}"><img alt="PyPI - Project Version" src="https://img.shields.io/pypi/v/{% include pathjoin('includes', 'project_slug.jinja') %}.svg?logo=PyPI&logoColor=ffd43b"/></a>""",
+"""        <a href="https://www.python.org"><img alt="PyPI - Python Version" src="https://img.shields.io/pypi/pyversions/{{ project_slug }}.svg?logo=Python&logoColor=ffd43b"/></a>
+        <a href="https://pypi.org/project/{{ project_slug }}"><img alt="PyPI - Project Version" src="https://img.shields.io/pypi/v/{{ project_slug }}.svg?logo=PyPI&logoColor=ffd43b"/></a>""",
     )
     readme_file.write_text(readme, encoding="utf-8")
 
@@ -40,7 +40,7 @@ def update_readme() -> None:
 To install the [package] from [PyPI] run
 
 ```console
-pip install {% include pathjoin('includes', 'project_slug.jinja') %}
+pip install {{ project_slug }}
 ```
 
 [PyPI]: https://pypi.org/
@@ -57,7 +57,7 @@ pip install {% include pathjoin('includes', 'project_slug.jinja') %}
 """,
 """
 [pip]: https://pip.pypa.io/en/stable
-[package]: https://pypi.org/project/{% include pathjoin('includes', 'project_slug.jinja') %}
+[package]: https://pypi.org/project/{{ project_slug }}
 """,
     )
     install_file.write_text(install, encoding="utf-8")

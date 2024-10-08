@@ -1,4 +1,8 @@
 _subdirectory: "template"
+_jinja_extensions:
+  - jinja2_time.TimeExtension
+  - whiteprints_template_context.context.ContextUpdater
+  - whiteprints_template_context.filters.WhiteprintsFilters
 _tasks:
   - ["git", "add", ".github/workflows/publish_pypi.yml"]
   - ["uv", "run", "injectors/md_files.py"]
@@ -29,5 +33,5 @@ _tasks:
   - ["git", "add", "--update"]
   - ["git", "commit", "--message", "feat: ✨ add PyPI publishing"]
   - ["git", "push"]
-  - ["uv", "--no-progress", "--quiet", "run", "--no-sync", "python", "-c", "print('\\n\\nPyPI OCID:\\nOwner:            {{ organisation }}\\nRepository name:  {% include(pathjoin('includes', 'project_slug.jinja')) %}\\nWorkflow name:    publish_pypi.yml\\nEnvironment name: publish_pypi')"]
-  - ["uv", "--no-progress", "--quiet", "run", "--no-sync", "python", "-c", "print('\\n\\nTest PyPI OCID:\\nOwner:            {{ organisation }}\\nRepository name:  {% include(pathjoin('includes', 'project_slug.jinja')) %}\\nWorkflow name:    publish_pypi.yml\\nEnvironment name: publish_testpypi')"]
+  - ["uv", "--no-progress", "--quiet", "run", "--no-sync", "python", "-c", "print('\\n\\nPyPI OCID:\\nOwner:            {{ organisation }}\\nRepository name:  {{ project_slug }}\\nWorkflow name:    publish_pypi.yml\\nEnvironment name: publish_pypi')"]
+  - ["uv", "--no-progress", "--quiet", "run", "--no-sync", "python", "-c", "print('\\n\\nTest PyPI OCID:\\nOwner:            {{ organisation }}\\nRepository name:  {{ project_slug }}\\nWorkflow name:    publish_pypi.yml\\nEnvironment name: publish_testpypi')"]

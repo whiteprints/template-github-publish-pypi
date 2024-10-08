@@ -31,7 +31,7 @@ def update_pyproject_toml() -> None:
         data = tomllib.load(file)
         urls = data.setdefault("project", {}).setdefault("urls", {})
 
-        urls["pypi"] = "https://pypi.org/project/{% include pathjoin('includes', 'project_slug.jinja') %}"
+        urls["pypi"] = "https://pypi.org/project/{{ project_slug }}"
 
     with Path("pyproject.toml").open("wb") as file:
         tomli_w.dump(data, file)
