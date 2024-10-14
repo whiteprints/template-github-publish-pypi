@@ -29,6 +29,7 @@ _tasks:
     "pyproject.toml",
   ]
     when: "{{ code_license_id == '' }}"
+  - ["git", "add", "--update"]
   - ["uvx", "--quiet", "--no-progress", "tox", "run", "-e", "autofix"]
   - ["git", "add", "--update"]
   - ["git", "commit", "--message", "feat: ✨ add PyPI publishing"]
