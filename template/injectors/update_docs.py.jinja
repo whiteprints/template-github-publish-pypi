@@ -7,19 +7,43 @@
 from pathlib import Path
 
 
-def main() -> None:
-    """Edit documentation configuration file."""
+def patch_linkcheck() -> None:
+    docs_file = Path("docs/conf.py")
+    docs = docs_file.read_text()
+    source_1 = """
+linkcheck_ignore = [
+"""
+    source_2 = """
+linkcheck_ignore = []
+"""
+    if not (source_1 in docs or source_2 in docs):
+        raise ValueError("Replacement failed.")
+
+    docs = docs.replace(
+        source_1,
+r"""
+linkcheck_ignore = [
+    r"https://pypi\.org/project/.*",
+"""
+    )
+    docs = docs.replace(
+        source_2,
+r"""
+linkcheck_ignore = [
+    r"https://pypi\.org/project/.*",
+]
+"""
+    )
+    docs_file.write_text(docs)
+
+
+def patch_theme() -> None:
+    """Add GitHub links."""
     docs_file = Path("docs/conf.py")
     docs = docs_file.read_text()
     source = """
 html_theme_options = {
     "icon_links": [
-        {
-            "name": "GitHub",
-            "url": "https://github.com/{{ organisation }}/{{ project_slug }}",
-            "icon": "fa-brands fa-square-github",
-            "type": "fontawesome",
-        },
 """
     if source not in docs:
         raise ValueError("Replacement failed.")
@@ -30,12 +54,6 @@ html_theme_options = {
 html_theme_options = {
     "icon_links": [
         {
-            "name": "GitHub",
-            "url": "https://github.com/{{ organisation }}/{{ project_slug }}",
-            "icon": "fa-brands fa-square-github",
-            "type": "fontawesome",
-        },
-        {
             "name": "PyPI",
             "url": "https://pypi.org/project/{{ project_slug }}",
             "icon": "fa-brands fa-python",
@@ -44,6 +62,12 @@ html_theme_options = {
 """,
     )
     docs_file.write_text(docs)
+
+
+def main() -> None:
+    """Edit documentation configuration file."""
+    patch_theme()
+    patch_linkcheck()
 
 if __name__ == "__main__":
     main()
