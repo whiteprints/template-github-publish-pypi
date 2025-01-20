@@ -71,7 +71,7 @@ async def configure_environment(
         logging.info(e)
 
 
-async def run_all_commands(gh_path: Path, tox_path: Path, git_path: Path) -> None:
+async def run_all_commands(gh_path: Path, git_path: Path) -> None:
     """Run all the necessary commands based on the provided conditions."""
 
     # Example condition and variables - replace these with actual logic
@@ -99,10 +99,9 @@ async def run_all_commands(gh_path: Path, tox_path: Path, git_path: Path) -> Non
 def main() -> None:
     """Main script."""
     gh_path = get_tool_path("gh")
-    tox_path = get_tool_path("tox")
     git_path = get_tool_path("git")
 
-    asyncio.run(run_all_commands(gh_path=gh_path, tox_path=tox_path, git_path=git_path))
+    asyncio.run(run_all_commands(gh_path=gh_path, git_path=git_path))
 
 
 if __name__ == "__main__":
